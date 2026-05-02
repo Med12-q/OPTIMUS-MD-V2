@@ -75,6 +75,7 @@ function launchBot() {
   console.log(chalk.bold.cyan('╚══════════════════════════════════════╝'));
 
   require('./bot');
+  require('./server');
 
   console.log(chalk.bold.green('✅ 𝐎𝐏𝐓𝐈𝐌𝐔𝐒-𝐗𝐌𝐃 ɪs ᴄᴏɴɴᴇᴄᴛᴇᴅ sᴜᴄᴄᴇssғᴜʟʟʏ!'));
 
