@@ -1,0 +1,16 @@
+node_modules/
+.env
+richstore/pairing/*/
+richstore/auth.json
+database/admintele.json
+database/admintele.json.bak
+database/users.json
+database/users.json.bak
+database/banned.json
+database/telepremium.json
+database/telepremium.json.bak
+allfunc/userTrack.json
+*.bak
+*.log
+.DS_Store
+Thumbs.db
