@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="OPTIMUS-XMD — Link your WhatsApp to the most powerful multi-device bot." />
+  <meta property="og:title" content="OPTIMUS-XMD | WhatsApp Pairing" />
+  <meta property="og:description" content="Connect your WhatsApp number in seconds and unlock 100+ commands." />
+  <meta property="og:image" content="https://gangalink.vercel.app/i/nfp41v55.jpg" />
+  <title>OPTIMUS-XMD | WhatsApp Pairing</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg:        #060c18;
+      --bg-2:      #0b1320;
+      --surface:   rgba(255,255,255,0.03);
+      --surface-h: rgba(255,255,255,0.06);
+      --border:    rgba(255,255,255,0.07);
+      --border-h:  rgba(37,211,102,0.35);
+      --green:     #25d366;
+      --green-d:   #128c7e;
+      --green-glow:rgba(37,211,102,0.18);
+      --text:      #dde4f0;
+      --muted:     #5a6485;
+      --error:     #ff4f6a;
+      --warn:      #ffb142;
+      --white:     #ffffff;
+      --r:         16px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── ANIMATED BACKGROUND ── */
+    .scene {
+      position: fixed; inset: 0; z-index: 0; overflow: hidden;
+      background: radial-gradient(ellipse 80% 60% at 15% 40%, rgba(18,140,126,.12) 0%, transparent 60%),
+                  radial-gradient(ellipse 60% 50% at 85% 20%, rgba(37,211,102,.08) 0%, transparent 55%),
+                  radial-gradient(ellipse 70% 70% at 50% 90%, rgba(6,12,24,1) 0%, transparent 70%),
+                  linear-gradient(160deg, #060c18 0%, #0b1320 60%, #060e1a 100%);
+    }
+
+    .grid-overlay {
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(37,211,102,.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(37,211,102,.04) 1px, transparent 1px);
+      background-size: 60px 60px;
+      mask-image: radial-gradient(ellipse 80% 80% at 50% 0%, black, transparent);
+    }
+
+    .orb {
+      position: absolute; border-radius: 50%;
+      filter: blur(80px); pointer-events: none;
+      animation: drift ease-in-out infinite alternate;
+    }
+    .orb-1 { width: 420px; height: 420px; top:-100px; left:-80px; background:rgba(37,211,102,.07); animation-duration:12s; }
+    .orb-2 { width: 320px; height: 320px; top:30%; right:-60px; background:rgba(18,140,126,.09); animation-duration:16s; animation-delay:-5s; }
+    .orb-3 { width: 260px; height: 260px; bottom:-80px; left:40%; background:rgba(37,211,102,.06); animation-duration:10s; animation-delay:-3s; }
+    @keyframes drift { from { transform: translate(0,0) scale(1); } to { transform: translate(30px,20px) scale(1.05); } }
+
+    /* particles */
+    .p { position:absolute; border-radius:50%; background:var(--green); opacity:0; animation: rise linear infinite; pointer-events:none; }
+    @keyframes rise {
+      0%   { transform:translateY(100vh) scale(0); opacity:0; }
+      8%   { opacity:.4; }
+      90%  { opacity:.15; }
+      100% { transform:translateY(-5vh) scale(1.2); opacity:0; }
+    }
+
+    /* ── LAYOUT ── */
+    .page {
+      position: relative; z-index: 1;
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center;
+      padding: 3rem 1.25rem 4rem;
+      gap: 2rem;
+    }
+
+    /* ── NAV BAR ── */
+    .nav {
+      width: 100%; max-width: 900px;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: .75rem 1.5rem;
+      background: rgba(255,255,255,.03);
+      border: 1px solid var(--border);
+      border-radius: 50px;
+      backdrop-filter: blur(16px);
+    }
+    .nav-brand {
+      display: flex; align-items: center; gap: .6rem;
+      font-weight: 700; font-size: .95rem; color: var(--white);
+    }
+    .nav-brand span { color: var(--green); }
+    .nav-dot { width:8px; height:8px; border-radius:50%; background:var(--green); box-shadow:0 0 8px var(--green); animation:blink 2s ease-in-out infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+    .nav-links { display:flex; gap:1.25rem; }
+    .nav-links a { color:var(--muted); font-size:.82rem; text-decoration:none; transition:color .2s; }
+    .nav-links a:hover { color:var(--green); }
+
+    /* ── HERO ── */
+    .hero { text-align: center; max-width: 560px; }
+
+    .badge {
+      display: inline-flex; align-items: center; gap: .45rem;
+      padding: .35rem 1rem;
+      background: rgba(37,211,102,.08);
+      border: 1px solid rgba(37,211,102,.2);
+      border-radius: 50px;
+      font-size: .75rem; font-weight: 600; color: var(--green);
+      letter-spacing: .5px; text-transform: uppercase;
+      margin-bottom: 1.25rem;
+    }
+    .badge-dot { width:6px; height:6px; border-radius:50%; background:var(--green); animation:blink 1.5s infinite; }
+
+    .hero h1 {
+      font-size: clamp(2.2rem, 6vw, 3.2rem);
+      font-weight: 900; line-height: 1.1;
+      letter-spacing: -1px;
+      background: linear-gradient(135deg, #fff 20%, var(--green) 80%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      margin-bottom: .75rem;
+    }
+
+    .hero p { color: var(--muted); font-size: 1rem; line-height: 1.6; max-width: 420px; margin: 0 auto; }
+
+    /* ── MAIN CARD ── */
+    .card {
+      width: 100%; max-width: 460px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 2.25rem;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 24px 64px rgba(0,0,0,.35), 0 0 0 1px rgba(255,255,255,.03);
+      transition: border-color .3s;
+    }
+    .card:focus-within { border-color: rgba(37,211,102,.25); }
+
+    .card-header {
+      display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem;
+    }
+    .card-icon {
+      width: 52px; height: 52px; flex-shrink: 0;
+      border-radius: 14px;
+      background: linear-gradient(135deg, var(--green), var(--green-d));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem;
+      box-shadow: 0 0 24px var(--green-glow);
+    }
+    .card-header-text h2 { font-size: 1.1rem; font-weight: 700; color: var(--white); }
+    .card-header-text p  { font-size: .8rem; color: var(--muted); margin-top: .15rem; }
+
+    /* ── FORM ── */
+    .label { font-size: .72rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: .5rem; display: block; }
+
+    .phone-row { display: flex; gap: .6rem; margin-bottom: 1.1rem; }
+
+    .flag-select {
+      flex: 0 0 auto; width: 96px; height: 52px;
+      padding: 0 .75rem;
+      background: var(--surface-h); border: 1px solid var(--border);
+      border-radius: 12px; color: var(--text); font-family: 'Inter', sans-serif;
+      font-size: .85rem; cursor: pointer; outline: none; appearance: none;
+      transition: border-color .2s, background .2s;
+    }
+    .flag-select:focus { border-color: var(--green); background: rgba(37,211,102,.05); }
+
+    .phone-input {
+      flex: 1; height: 52px; padding: 0 1.1rem;
+      background: var(--surface-h); border: 1px solid var(--border);
+      border-radius: 12px; color: var(--white); font-family: 'Inter', sans-serif;
+      font-size: 1rem; outline: none;
+      transition: border-color .2s, background .2s, box-shadow .2s;
+    }
+    .phone-input::placeholder { color: var(--muted); }
+    .phone-input:focus { border-color: var(--green); background: rgba(37,211,102,.04); box-shadow: 0 0 0 3px rgba(37,211,102,.1); }
+
+    .hint { font-size: .75rem; color: var(--muted); margin-bottom: 1.25rem; }
+    .hint b { color: var(--text); }
+
+    .btn-pair {
+      width: 100%; height: 52px;
+      background: linear-gradient(135deg, var(--green) 0%, var(--green-d) 100%);
+      border: none; border-radius: 13px;
+      color: #fff; font-size: .95rem; font-weight: 700; font-family: 'Inter', sans-serif;
+      cursor: pointer; display: flex; align-items: center; justify-content: center; gap: .5rem;
+      box-shadow: 0 4px 20px rgba(37,211,102,.3);
+      transition: transform .2s, box-shadow .2s, opacity .2s;
+    }
+    .btn-pair:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(37,211,102,.4); }
+    .btn-pair:active:not(:disabled) { transform: none; }
+    .btn-pair:disabled { opacity: .55; cursor: not-allowed; }
+
+    .spin { width:18px; height:18px; border-radius:50%; border:2.5px solid rgba(255,255,255,.3); border-top-color:#fff; animation:spin .7s linear infinite; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+
+    /* ── CODE RESULT ── */
+    .result-box {
+      display: none; margin-top: 1.25rem;
+      border-radius: 16px; overflow: hidden;
+      border: 1px solid rgba(37,211,102,.25);
+      animation: popIn .4s cubic-bezier(.34,1.56,.64,1);
+    }
+    @keyframes popIn { from { opacity:0; transform:scale(.95) translateY(8px); } to { opacity:1; transform:none; } }
+
+    .result-top {
+      background: linear-gradient(135deg, rgba(37,211,102,.12), rgba(18,140,126,.08));
+      padding: 1.5rem; text-align: center;
+    }
+    .result-label { font-size: .7rem; font-weight: 700; color: var(--green); letter-spacing: 2.5px; text-transform: uppercase; margin-bottom: .75rem; }
+
+    .code-display {
+      display: flex; align-items: center; justify-content: center; gap: .5rem;
+      flex-wrap: wrap;
+    }
+    .code-chunk {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 2.2rem; font-weight: 700;
+      color: var(--white);
+      background: rgba(0,0,0,.3);
+      border: 1px solid rgba(37,211,102,.2);
+      border-radius: 10px; padding: .2rem .7rem;
+      letter-spacing: 6px;
+      text-shadow: 0 0 24px rgba(37,211,102,.5);
+    }
+    .code-sep { font-size: 2rem; color: var(--muted); font-weight: 300; }
+
+    .result-bottom {
+      background: rgba(0,0,0,.2);
+      padding: .75rem 1.25rem;
+      display: flex; align-items: center; justify-content: space-between; gap: .75rem;
+      flex-wrap: wrap;
+    }
+
+    .timer-wrap { display:flex; align-items:center; gap:.4rem; font-size:.8rem; color:var(--muted); }
+    .timer-val { color: var(--warn); font-weight: 700; font-variant-numeric: tabular-nums; }
+
+    .btn-copy {
+      display: flex; align-items: center; gap: .4rem;
+      padding: .5rem 1.1rem; border-radius: 9px;
+      background: rgba(37,211,102,.15); border: 1px solid rgba(37,211,102,.3);
+      color: var(--green); font-size: .82rem; font-weight: 700; font-family: 'Inter', sans-serif;
+      cursor: pointer; transition: background .2s, transform .15s;
+    }
+    .btn-copy:hover { background: rgba(37,211,102,.25); transform: scale(1.02); }
+    .btn-copy.copied { background: rgba(37,211,102,.3); color: #fff; }
+
+    /* ── ERROR ── */
+    .error-wrap {
+      display: none; margin-top: 1rem;
+      padding: .85rem 1.1rem;
+      background: rgba(255,79,106,.08); border: 1px solid rgba(255,79,106,.25);
+      border-radius: 10px; color: var(--error); font-size: .83rem;
+      display: none; align-items: center; gap: .5rem;
+    }
+
+    /* ── STEPS ── */
+    .steps-title { font-size: .72rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 2px; text-align: center; margin-bottom: 1rem; }
+
+    .steps-grid { width:100%; max-width:900px; display:grid; grid-template-columns:repeat(auto-fit, minmax(210px, 1fr)); gap:.75rem; }
+
+    .step-card {
+      padding: 1.25rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      backdrop-filter: blur(12px);
+      transition: border-color .25s, transform .2s;
+    }
+    .step-card:hover { border-color: var(--border-h); transform: translateY(-2px); }
+
+    .step-num-badge {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 30px; height: 30px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--green), var(--green-d));
+      font-size: .8rem; font-weight: 800; color: #fff;
+      box-shadow: 0 0 10px var(--green-glow); margin-bottom: .8rem;
+    }
+    .step-card h3 { font-size: .88rem; font-weight: 700; color: var(--white); margin-bottom: .3rem; }
+    .step-card p  { font-size: .78rem; color: var(--muted); line-height: 1.55; }
+
+    /* ── FEATURES ── */
+    .features { width:100%; max-width:900px; display:grid; grid-template-columns:repeat(auto-fit, minmax(160px,1fr)); gap:.6rem; }
+
+    .feature {
+      display: flex; align-items: center; gap: .6rem;
+      padding: .9rem 1rem;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 14px; font-size: .82rem; color: var(--muted);
+      transition: border-color .2s;
+    }
+    .feature:hover { border-color: var(--border-h); color: var(--text); }
+    .feature-icon { font-size: 1.1rem; flex-shrink: 0; }
+
+    /* ── FOOTER ── */
+    .footer {
+      width: 100%; max-width: 900px; padding-top: 1rem;
+      border-top: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: .75rem;
+    }
+    .footer-brand { font-size: .8rem; font-weight: 700; color: var(--muted); }
+    .footer-brand span { color: var(--green); }
+    .footer-links { display:flex; gap:1.25rem; }
+    .footer-links a { font-size: .78rem; color: var(--muted); text-decoration: none; transition: color .2s; }
+    .footer-links a:hover { color: var(--green); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 520px) {
+      .nav-links { display: none; }
+      .page { padding: 1.5rem 1rem 3rem; gap: 1.5rem; }
+      .card { padding: 1.5rem; }
+      .code-chunk { font-size: 1.7rem; }
+      .footer { flex-direction: column; align-items: center; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- BACKGROUND -->
+<div class="scene">
+  <div class="grid-overlay"></div>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+  <div id="particles"></div>
+</div>
+
+<div class="page">
+
+  <!-- NAV -->
+  <nav class="nav">
+    <div class="nav-brand">
+      <div class="nav-dot"></div>
+      <span>OPTIMUS</span>-XMD
+    </div>
+    <div class="nav-links">
+      <a href="https://t.me/varnox_official" target="_blank">Channel</a>
+      <a href="https://t.me/varnox_Gc" target="_blank">Group</a>
+      <a href="https://t.me/Varnox_Or_novark" target="_blank">Dev</a>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="badge"><span class="badge-dot"></span> v2.0.5 — Now Live</div>
+    <h1>OPTIMUS-XMD<br/>Pairing Portal</h1>
+    <p>Connect your WhatsApp number in seconds and unlock 100+ powerful bot commands instantly.</p>
+  </div>
+
+  <!-- CARD -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon">🤖</div>
+      <div class="card-header-text">
+        <h2>Link Your WhatsApp</h2>
+        <p>Enter your number to get your pairing code</p>
+      </div>
+    </div>
+
+    <label class="label" for="phone">WhatsApp Number</label>
+    <div class="phone-row">
+      <select class="flag-select" id="countryCode">
+        <option value="224">🇬🇳 +224</option>
+        <option value="225">🇨🇮 +225</option>
+        <option value="221">🇸🇳 +221</option>
+        <option value="212">🇲🇦 +212</option>
+        <option value="237">🇨🇲 +237</option>
+        <option value="243">🇨🇩 +243</option>
+        <option value="234">🇳🇬 +234</option>
+        <option value="27">🇿🇦 +27</option>
+        <option value="20">🇪🇬 +20</option>
+        <option value="33">🇫🇷 +33</option>
+        <option value="44">🇬🇧 +44</option>
+        <option value="1">🇺🇸 +1</option>
+        <option value="55">🇧🇷 +55</option>
+        <option value="91">🇮🇳 +91</option>
+        <option value="7">🇷🇺 +7</option>
+      </select>
+      <input
+        type="tel" id="phone" class="phone-input"
+        placeholder="6xx xxx xxxx" maxlength="14"
+        autocomplete="tel" inputmode="numeric"
+      />
+    </div>
+    <p class="hint">No leading zero — e.g. <b>620 000 000</b></p>
+
+    <button class="btn-pair" id="pairBtn" onclick="generateCode()">
+      <span id="btnIcon">🔗</span>
+      <span id="btnText">Generate Pairing Code</span>
+    </button>
+
+    <!-- ERROR -->
+    <div class="error-wrap" id="errorBox" role="alert"></div>
+
+    <!-- RESULT -->
+    <div class="result-box" id="resultBox">
+      <div class="result-top">
+        <div class="result-label">📋 Your Pairing Code</div>
+        <div class="code-display" id="codeDisplay">
+          <div class="code-chunk" id="codePart1">——</div>
+          <div class="code-sep">-</div>
+          <div class="code-chunk" id="codePart2">——</div>
+        </div>
+      </div>
+      <div class="result-bottom">
+        <div class="timer-wrap">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          Expires in <span class="timer-val" id="countdown">120</span>s
+        </div>
+        <button class="btn-copy" id="copyBtn" onclick="copyCode()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          <span id="copyLabel">Copy Code</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- HOW IT WORKS -->
+  <p class="steps-title">How it works</p>
+  <div class="steps-grid">
+    <div class="step-card">
+      <div class="step-num-badge">1</div>
+      <h3>Enter Your Number</h3>
+      <p>Select your country and type your WhatsApp number without the leading zero.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num-badge">2</div>
+      <h3>Copy the Code</h3>
+      <p>Click Generate — a unique 8-character code will appear. Copy it instantly.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num-badge">3</div>
+      <h3>Paste in WhatsApp</h3>
+      <p>Go to <b>WhatsApp → Linked Devices → Link a Device → Link with phone number</b>, then paste.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num-badge">4</div>
+      <h3>Enjoy 100+ Commands</h3>
+      <p>Your bot is live! Type <b>.menu</b> in any WhatsApp chat to see all available commands.</p>
+    </div>
+  </div>
+
+  <!-- FEATURES -->
+  <div class="features">
+    <div class="feature"><span class="feature-icon">🎮</span> Games & Fun</div>
+    <div class="feature"><span class="feature-icon">🎨</span> GFX & Design</div>
+    <div class="feature"><span class="feature-icon">📥</span> Downloader</div>
+    <div class="feature"><span class="feature-icon">🤖</span> AI Commands</div>
+    <div class="feature"><span class="feature-icon">👥</span> Group Tools</div>
+    <div class="feature"><span class="feature-icon">🛡️</span> Anti-Spam</div>
+    <div class="feature"><span class="feature-icon">🎵</span> Music Player</div>
+    <div class="feature"><span class="feature-icon">🔞</span> NSFW (18+)</div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-brand"><span>OPTIMUS</span>-XMD v2.0.5 &nbsp;·&nbsp; Dev: @Varnox_Or_novark</div>
+    <div class="footer-links">
+      <a href="https://t.me/varnox_official" target="_blank">📢 Channel</a>
+      <a href="https://t.me/varnox_Gc" target="_blank">👥 Group</a>
+      <a href="https://t.me/Varnox_Or_novark" target="_blank">💬 Contact</a>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+  /* ── PARTICLES ── */
+  (function() {
+    const c = document.getElementById('particles');
+    for (let i = 0; i < 22; i++) {
+      const p = document.createElement('div');
+      p.className = 'p';
+      const s = Math.random() * 3.5 + 1.5;
+      p.style.cssText = `width:${s}px;height:${s}px;left:${Math.random()*100}vw;animation-duration:${Math.random()*18+12}s;animation-delay:${Math.random()*12}s`;
+      c.appendChild(p);
+    }
+  })();
+
+  /* ── STATE ── */
+  let currentCode = '';
+  let timerID = null;
+
+  /* ── GENERATE ── */
+  async function generateCode() {
+    const code = document.getElementById('countryCode').value;
+    const raw  = document.getElementById('phone').value.replace(/\D/g, '');
+
+    if (!raw || raw.length < 5) { return showError('Please enter a valid phone number.'); }
+
+    const full = code + raw;
+
+    setLoading(true);
+    hideError();
+    document.getElementById('resultBox').style.display = 'none';
+    clearInterval(timerID);
+
+    try {
+      const res = await fetch('/api/pair', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ number: full })
+      });
+      const data = await res.json();
+
+      if (!res.ok || !data.code) {
+        throw new Error(data.error || 'Failed to generate pairing code. Please try again.');
+      }
+
+      currentCode = data.code;
+      showResult(data.code);
+      startTimer(120);
+
+    } catch (err) {
+      showError(err.message || 'Connection error. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  /* ── DISPLAY CODE ── */
+  function showResult(code) {
+    const clean = code.replace(/[^A-Z0-9]/gi, '').toUpperCase();
+    const p1 = clean.slice(0, 4) || '----';
+    const p2 = clean.slice(4, 8) || '----';
+    document.getElementById('codePart1').textContent = p1;
+    document.getElementById('codePart2').textContent = p2;
+    const box = document.getElementById('resultBox');
+    box.style.display = 'block';
+  }
+
+  /* ── TIMER ── */
+  function startTimer(sec) {
+    clearInterval(timerID);
+    const el = document.getElementById('countdown');
+    let t = sec;
+    el.textContent = t;
+    timerID = setInterval(() => {
+      t--;
+      el.textContent = t;
+      if (t <= 10) el.style.color = 'var(--error)';
+      if (t <= 0) {
+        clearInterval(timerID);
+        el.textContent = 'EXPIRED';
+        el.style.fontWeight = '800';
+      }
+    }, 1000);
+  }
+
+  /* ── COPY ── */
+  function copyCode() {
+    if (!currentCode) return;
+    navigator.clipboard.writeText(currentCode).then(() => {
+      const btn = document.getElementById('copyBtn');
+      const lbl = document.getElementById('copyLabel');
+      btn.classList.add('copied');
+      lbl.textContent = '✓ Copied!';
+      setTimeout(() => { btn.classList.remove('copied'); lbl.textContent = 'Copy Code'; }, 2200);
+    });
+  }
+
+  /* ── UI HELPERS ── */
+  function setLoading(on) {
+    const btn  = document.getElementById('pairBtn');
+    const icon = document.getElementById('btnIcon');
+    const txt  = document.getElementById('btnText');
+    btn.disabled = on;
+    icon.innerHTML = on ? '<div class="spin"></div>' : '🔗';
+    txt.textContent = on ? 'Generating code…' : 'Generate Pairing Code';
+  }
+
+  function showError(msg) {
+    const el = document.getElementById('errorBox');
+    el.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg> ${msg}`;
+    el.style.display = 'flex';
+  }
+
+  function hideError() {
+    const el = document.getElementById('errorBox');
+    el.style.display = 'none';
+  }
+
+  /* ── ENTER KEY ── */
+  document.getElementById('phone').addEventListener('keypress', e => {
+    if (e.key === 'Enter') generateCode();
+  });
+</script>
+</body>
+</html>
