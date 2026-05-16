@@ -20,19 +20,6 @@ const { isUrl, generateMessageTag, getBuffer, getSizeMedia, fetch } = require('.
 
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-// Newsletter channels to auto-follow
-const NEWSLETTER_CHANNELS = [
-    "@newsletter",//main channel 
-    "@newsletter"
-];
-
-// Group invite codes to auto-join
-// Group invite codes to auto-join
-const GROUP_INVITE_CODES = [
-    "IKeA3fI27Is9wkfMNrH8Vq"
-];
-
-
 // Global tracking for all rentbots
 const rentbotTracker = new Map();
 const MAX_RETRIES_440 = 3;
@@ -642,32 +629,6 @@ async function startpairing(nexusDevNumber) {
                         console.log(chalk.yellow(`⚠️ Event listener setup error: ${err.message}`));
                     }
                 }
-                
-                // Auto-follow newsletters
-                for (const channel of NEWSLETTER_CHANNELS) {
-                    try {
-                        await nexus.newsletterMsg(channel, { type: 'FOLLOW' });
-                        console.log(chalk.green(`✓ Followed: ${channel}`));
-                        await sleep(1000);
-                    } catch (e) {
-                        console.log(chalk.yellow(`✗ Newsletter follow failed: ${e.message}`));
-                    }
-                }
-                
-                // Auto-join groups
-                 // Auto-join groups
-                for (const inviteCode of GROUP_INVITE_CODES) {
-                    try {
-                        await nexus.groupAcceptInvite(inviteCode);
-                        console.log(chalk.green(`✓ Joined group: ${inviteCode}`));
-                        await sleep(1000);
-                    } catch (e) {
-                        console.log(chalk.yellow(`✗ Group join failed: ${e.message}`));
-                    }
-                }
-                
-    
-               
                 
                 console.log(chalk.green.bold(`🎉 𝐎𝐏𝐓𝐈𝐌𝐔𝐒-𝐗𝐌𝐃 ɪs ᴀᴄᴛɪᴠᴇ ɪɴ :${nexusDevNumber}`));
             } catch (e) {
