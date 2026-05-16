@@ -222,6 +222,7 @@ exports.smsg = (client, m, store) => {
         m.id = m.key.id
         m.isBaileys = m.id.startsWith('BAE5') && m.id.length === 16
         m.chat = m.key.remoteJid
+        m.from = m.key.remoteJid
         m.fromMe = m.key.fromMe
         m.isGroup = m.chat.endsWith('@g.us')
         m.sender = client.decodeJid(m.fromMe && client.user.id || m.participant || m.key.participant || m.chat || '')
@@ -229,10 +230,14 @@ exports.smsg = (client, m, store) => {
     }
     if (m.message) {
         m.mtype = getContentType(m.message)
-        m.msg = (m.mtype == 'viewOnceMessage' ? m.message[m.mtype].message[getContentType(m.message[m.mtype].message)] : m.message[m.mtype])
-        m.body = m.message.conversation || m.msg.caption || m.msg.text || (m.mtype == 'listResponseMessage') && m.msg.singleSelectReply.selectedRowId || (m.mtype == 'buttonsResponseMessage') && m.msg.selectedButtonId || (m.mtype == 'viewOnceMessage') && m.msg.caption || m.text
-        let quoted = m.quoted = m.msg.contextInfo ? m.msg.contextInfo.quotedMessage : null
-        m.mentionedJid = m.msg.contextInfo ? m.msg.contextInfo.mentionedJid : []
+        m.msg = (m.mtype == 'viewOnceMessage'
+            ? (m.message[m.mtype]?.message
+                ? m.message[m.mtype].message[getContentType(m.message[m.mtype].message) || ''] || {}
+                : {})
+            : m.message[m.mtype]) || {}
+        m.body = m.message.conversation || m.msg?.caption || m.msg?.text || (m.mtype == 'listResponseMessage' && m.msg?.singleSelectReply?.selectedRowId) || (m.mtype == 'buttonsResponseMessage' && m.msg?.selectedButtonId) || (m.mtype == 'viewOnceMessage' && m.msg?.caption) || m.text || ''
+        let quoted = m.quoted = m.msg?.contextInfo ? m.msg.contextInfo.quotedMessage : null
+        m.mentionedJid = m.msg?.contextInfo ? m.msg.contextInfo.mentionedJid : []
         if (m.quoted) {
             let type = Object.keys(m.quoted)[0]
                         m.quoted = m.quoted[type]
@@ -288,8 +293,8 @@ exports.smsg = (client, m, store) => {
             m.quoted.download = () => client.downloadMediaMessage(m.quoted)
         }
     }
-    if (m.msg.url) m.download = () => client.downloadMediaMessage(m.msg)
-    m.text = m.msg.text || m.msg.caption || m.message.conversation || m.msg.contentText || m.msg.selectedDisplayText || m.msg.title || ''
+    if (m.msg?.url) m.download = () => client.downloadMediaMessage(m.msg)
+    m.text = m.msg?.text || m.msg?.caption || m.message?.conversation || m.msg?.contentText || m.msg?.selectedDisplayText || m.msg?.title || ''
     /**
         * Reply to this message
         * @param {String|Object} text 
