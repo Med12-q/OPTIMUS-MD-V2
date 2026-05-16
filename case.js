@@ -50,7 +50,7 @@ function trackUser(sender, pushName) {
 process.on('uncaughtException', (err) => { console.error(err); });
 
 module.exports = rich = async (rich, m, chatUpdate, store) => {
-const { from } = m
+const from = m.from || m.chat || m.key?.remoteJid
 try {
       
 
@@ -119,12 +119,12 @@ const quoted = m.quoted ? m.quoted : m
 const { spawn: spawn, exec } = require('child_process')
 const sender = m.isGroup ? (m.key.participant ? m.key.participant : m.participant) : m.key.remoteJid 
 trackUser(sender, m.pushName);
-const groupMetadata = m.isGroup ? await rich.groupMetadata(from).catch(e => {}) : ''
-const participants = m.isGroup ? await groupMetadata.participants : ''
-const groupAdmins = m.isGroup ? await getGroupAdmins(participants) : ''
+const groupMetadata = m.isGroup ? await rich.groupMetadata(from).catch(e => null) : null
+const participants = m.isGroup && groupMetadata ? groupMetadata.participants || [] : []
+const groupAdmins = m.isGroup && groupMetadata ? getGroupAdmins(participants) : []
 const isBotAdmins = m.isGroup ? groupAdmins.includes(botNumber) : false
 const isAdmins = m.isGroup ? groupAdmins.includes(m.sender) : false
-const groupName = m.isGroup ? groupMetadata.subject : "";
+const groupName = m.isGroup && groupMetadata ? groupMetadata.subject || "" : "";
 const pushname = m.pushName || "No Name"
 const time = moment(Date.now()).tz('Asia/Jakarta').locale('id').format('HH:mm:ss z')
 const mime = (quoted.msg || quoted).mimetype || ''
@@ -326,7 +326,7 @@ if (getSetting(m.chat, "feature.antibot", false)) {
 }
 
 if (m.message) {
-    console.log(chalk.hex('#3498db')(`message " ${m.message} "  from ${pushname} id ${m.isGroup ? `group ${groupMetadata.subject}` : 'private chat'}`));
+    console.log(chalk.hex('#3498db')(`message " ${body} "  from ${pushname} id ${m.isGroup ? `group ${groupName}` : 'private chat'}`));
 }
 
 switch(command) {
