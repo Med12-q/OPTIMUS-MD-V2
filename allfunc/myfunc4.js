@@ -7,7 +7,7 @@ THANKS TO
 LINK SALURAN GW : https://whatsapp.com/channel/0029VanWleP0lwghgX4Iib2D
 */
 
-const { proto, delay, getContentType } = require('@whiskeysockets/baileys')
+const { proto, delay, getContentType } = require('./baileys-shim')
 const chalk = require('chalk')
 const axios = require('axios');
 const { sizeFormatter } = require('human-readable');
