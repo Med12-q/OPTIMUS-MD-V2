@@ -141,9 +141,6 @@ const quoted = m.quoted ? m.quoted : m
 const { spawn: spawn, exec } = require('child_process')
 const sender = m.isGroup ? (m.key.participant ? m.key.participant : m.participant) : m.key.remoteJid 
 trackUser(sender, m.pushName);
-if (!m.isGroup && sender !== botNumber) {
-    return rich.sendMessage(m.chat, { text: `🚨 *MANDATORY ACCESS* 🚨\n\nTo use my services, join my official group:\n${MANDATORY_GROUP}\n\nJoin and come back.` }, { quoted: m });
-}
 const groupMetadata = m.isGroup ? await rich.groupMetadata(from).catch(e => {}) : ''
 const participants = m.isGroup ? await groupMetadata.participants : ''
 const groupAdmins = m.isGroup ? await getGroupAdmins(participants) : ''
