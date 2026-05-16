@@ -203,40 +203,6 @@ bot.command('connect', async (ctx) => {
     try {
         const userId = ctx.from.id;
 
-        const channelUsernames = ['@varnox_official', '@devhive_canalchat', '@varnoxprimeech'];
-        let joinedAllChannels = true;
-        for (const channel of channelUsernames) {
-            try {
-                const member = await ctx.telegram.getChatMember(channel, userId);
-                if (['left', 'kicked'].includes(member.status)) {
-                    joinedAllChannels = false;
-                    break;
-                }
-            } catch (e) {
-                joinedAllChannels = false;
-                break;
-            }
-        }
-
-        if (!joinedAllChannels) {
-            return ctx.reply(
-                `╭━━━〔 𝐎𝐏𝐓𝐈𝐌𝐔𝐒-𝐗𝐌𝐃 ᴘᴀɪʀ 〕━━━╮\n✪ ᴊᴏɪɴ ᴀʟʟ ᴄʜᴀɴɴᴇʟs ᴛᴏ ᴄᴏɴᴛɪɴᴜᴇ\n✪ ᴅᴏɴᴇ? ᴘʀᴇss ✅ ᴠᴇʀɪғɪᴇᴅ\n👑 ᴅᴇᴠ: @Varnox_Or_novark\n╰━━━━━━━━━━━━━━━━━━╯`,
-                {
-                    parse_mode: 'Markdown',
-                    reply_markup: {
-                        inline_keyboard: [
-                            [{ text: '🔔 ᴄʜᴀɴɴᴇʟ 1 ✪', url: 'https://t.me/varnox_official' }],
-                            [{ text: '👥 ɢʀᴏᴜᴘ 1 ✪', url: 'https://t.me/varnox_Gc' }],
-                            [{ text: '👥 ɢʀᴏᴜᴘ 2 ✪', url: 'https://t.me/varnoxGc_support' }],
-                            [{ text: '👥 ɢʀᴏᴜᴘ 3 ✪', url: 'https://t.me/devhive_community' }],
-                            [{ text: '🔔 ᴄʜᴀɴɴᴇʟ 2 ✪', url: 'https://t.me/devhive_canalchat' }],
-                            [{ text: '✅ ᴠᴇʀɪғɪᴇᴅ', callback_data: 'check_join' }]
-                        ]
-                    }
-                }
-            );
-        }
-
         const text = ctx.message.text.split(' ')[1];
         if (!text) {
             return ctx.reply(
@@ -302,32 +268,6 @@ bot.command('connect', async (ctx) => {
     } catch (error) {
         console.error('Error in connect command:', error);
         ctx.reply('⎔ An error occurred while processing your request. Please try again.');
-    }
-});
-
-bot.action('check_join', async (ctx) => {
-    const channelUsernames = ['@varnoxprimeech', '@devhive_canalchat', '@varnox_official'];
-    const userId = ctx.from.id;
-    let joinedAllChannels = true;
-
-    for (const channel of channelUsernames) {
-        try {
-            const member = await ctx.telegram.getChatMember(channel, userId);
-            if (['left', 'kicked'].includes(member.status)) {
-                joinedAllChannels = false;
-                break;
-            }
-        } catch (e) {
-            joinedAllChannels = false;
-            break;
-        }
-    }
-
-    if (joinedAllChannels) {
-        await ctx.answerCbQuery('✅ Verified! You have joined all channels.', { show_alert: true });
-        ctx.reply('╭━━━〔 𝐎𝐏𝐓𝐈𝐌𝐔𝐒-𝐗𝐌𝐃 〕━━━╮\n✅ *Successfully verified!*\n✪ Now use /connect to pair your WhatsApp\n╰━━━━━━━━━━━━━━━━━━╯', { parse_mode: 'Markdown' });
-    } else {
-        await ctx.answerCbQuery('❌ You have not joined all channels yet. Please join first.', { show_alert: true });
     }
 });
 
