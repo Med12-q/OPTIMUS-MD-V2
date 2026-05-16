@@ -1,27 +1,5 @@
 require('./setting/config')
-const { 
-  default: baileys, proto, jidNormalizedUser, generateWAMessage, 
-  generateWAMessageFromContent, getContentType, prepareWAMessageMedia 
-} = require("@whiskeysockets/baileys");
-
-const {
-  downloadContentFromMessage, emitGroupParticipantsUpdate, emitGroupUpdate, 
-  generateWAMessageContent, makeInMemoryStore, MediaType, areJidsSameUser, 
-  WAMessageStatus, downloadAndSaveMediaMessage, AuthenticationState, 
-  GroupMetadata, initInMemoryKeyStore, MiscMessageGenerationOptions, 
-  useSingleFileAuthState, BufferJSON, WAMessageProto, MessageOptions, 
-  WAFlag, WANode, WAMetric, ChatModification, MessageTypeProto, 
-  WALocationMessage, WAContextInfo, WAGroupMetadata, ProxyAgent, 
-  waChatKey, MimetypeMap, MediaPathMap, WAContactMessage, 
-  WAContactsArrayMessage, WAGroupInviteMessage, WATextMessage, 
-  WAMessageContent, WAMessage, BaileysError, WA_MESSAGE_STATUS_TYPE, 
-  MediariyuInfo, URL_REGEX, WAUrlInfo, WA_DEFAULT_EPHEMERAL, 
-  WAMediaUpload, mentionedJid, processTime, Browser, MessageType, 
-  Presence, WA_MESSAGE_STUB_TYPES, Mimetype, relayWAMessage, Browsers, 
-  GroupSettingChange, DisriyuectReason, WASocket, getStream, WAProto, 
-  isBaileys, AnyMessageContent, fetchLatestBaileysVersion, 
-  templateMessage, InteractiveMessage, Header 
-} = require("@whiskeysockets/baileys");
+// baileys v6 is ESM-only — exports loaded lazily inside async handler via import()
 
 const fs = require('fs')
 const util = require('util')
@@ -677,8 +655,17 @@ break;
 // 🔹 Owner case
 case 'dev':
 case 'owner': {
-   let vcard = `BEGIN:VCARD\nVERSION:2.0.0\nFN:𝐌ꝛ 𝛁𝚫𝚪𝚴𝚯𝚾•𝚸𝚪𝚰𝚳𝚵𝚵 𝚻𝚵𝐂𝚮 𝚯𝐅𝐅𝚰𝐂𝐈𝚫𝐋\nTEL;type=CELL;type=VOICE;waid=224669288332:+224669288332\nEND:VCARD`
-   await rich.sendMessage(m.chat, { contacts: { displayName: "Owner", contacts: [{ vcard }] }}, { quoted: m })
+   const ownerNum = '224669288332';
+   const ownerName = '𝐌ꝛ 𝛁𝚫𝚪𝚴𝚯𝚾•𝚸𝚪𝚰𝚳𝚵𝚵 𝚻𝚵𝐂𝚮 𝚯𝐅𝐅𝚰𝐂𝐈𝚫𝐋';
+   const ownerPhoto = 'https://files.catbox.moe/jieuny.jpg';
+   const vcard = `BEGIN:VCARD\nVERSION:3.0\nFN:${ownerName}\nTEL;type=CELL;type=VOICE;waid=${ownerNum}:+${ownerNum}\nEND:VCARD`;
+   await rich.sendMessage(m.chat, {
+       image: { url: ownerPhoto },
+       caption: `╭━━━〔 𝐎𝐏𝐓𝐈𝐌𝐔𝐒-𝐗𝐌𝐃 〕━━━╮\n✪ 👑 *ᴏᴡɴᴇʀ*\n✪ 📛 ɴᴀᴍᴇ: ${ownerName}\n✪ 📞 ɴᴜᴍʙᴇʀ: +${ownerNum}\n╰━━━━━━━━━━━━━━━━━━╯`,
+   }, { quoted: m });
+   await rich.sendMessage(m.chat, {
+       contacts: { displayName: ownerName, contacts: [{ vcard }] }
+   }, { quoted: m });
 }
 break
 
