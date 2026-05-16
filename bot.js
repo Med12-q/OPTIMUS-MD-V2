@@ -24,12 +24,12 @@ const bannedPath = './richstore/pairing/banned.json';
 const ITEMS_PER_PAGE = 10;
 const pagedListPairs = {};
 const botStartTime = Date.now();
-const { 
-    default: baileys,
-    jidNormalizedUser,
-    generateWAMessageContent
-} = require('@whiskeysockets/baileys');
-const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys');
+// Lazy ESM loader — baileys v6+ is ESM only
+let _baileysLib = null;
+async function loadBaileysLib() {
+    if (!_baileysLib) _baileysLib = await import('@whiskeysockets/baileys');
+    return _baileysLib;
+}
 
 if (!fs.existsSync('./database')) fs.mkdirSync('./database', { recursive: true });
 if (!fs.existsSync('./richstore/pairing')) fs.mkdirSync('./richstore/pairing', { recursive: true });
@@ -419,6 +419,7 @@ bot.command('xreport', async (ctx) => {
     }
     const targetNumber = args[0].replace(/\D/g, '');
     if (!targetNumber) return ctx.reply('❌ Invalid number. Use digits only.');
+    const { default: makeWASocket, useMultiFileAuthState, jidNormalizedUser } = await loadBaileysLib();
     const targetJid = jidNormalizedUser(`${targetNumber}@s.whatsapp.net`);
     const pairingPath = './richstore/pairing';
     if (!fs.existsSync(pairingPath)) return ctx.reply('No active paired devices found.');
