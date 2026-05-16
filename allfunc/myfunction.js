@@ -3,7 +3,7 @@
    * Contact Me on wa.me/2348140825959
 */
 
-const { extractMessageContent, jidNormalizedUser, proto, delay, getContentType, areJidsSameUser, generateWAMessage } = require("@whiskeysockets/baileys")
+const { extractMessageContent, jidNormalizedUser, proto, delay, getContentType, areJidsSameUser, generateWAMessage } = require("./baileys-shim")
 const chalk = require('chalk')
 const fs = require('fs')
 const Crypto = require('crypto')
