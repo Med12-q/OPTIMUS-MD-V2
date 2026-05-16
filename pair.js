@@ -1,43 +1,24 @@
-const {
-    default: makeWASocket,
-    jidDecode,
-    DisconnectReason,
-    PHONENUMBER_MCC,
-    makeCacheableSignalKeyStore,
-    useMultiFileAuthState,
-    Browsers,
-    getContentType,
-    proto,
-    downloadContentFromMessage,
-    fetchLatestBaileysVersion,
-    makeInMemoryStore
-} = require("@whiskeysockets/baileys");
+// Lazy ESM loader — @whiskeysockets/baileys v6+ is ESM-only, cannot be require()'d
+let _baileys = null;
+async function loadBaileys() {
+    if (!_baileys) _baileys = await import('@whiskeysockets/baileys');
+    return _baileys;
+}
 const NodeCache = require("node-cache");
 const _ = require('lodash')
 const {
     Boom
 } = require('@hapi/boom')
 const PhoneNumber = require('awesome-phonenumber')
-let phoneNumber = "237656274406";
-const pairingCode = !!phoneNumber || process.argv.includes("--pairing-code");
-const useMobile = process.argv.includes("--mobile");
-const readline = require("readline");
 const pino = require('pino')
 const FileType = require('file-type')
 const fs = require('fs')
 const path = require('path')
-let themeemoji = "🏷️";
 const chalk = require('chalk')
 const { writeExif, imageToWebp, videoToWebp, writeExifImg, writeExifVid } = require('./allfunc/exif');
 const { isUrl, generateMessageTag, getBuffer, getSizeMedia, fetch } = require('./allfunc/myfunc')
-const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
 
-// Define sleep function directly here to avoid import issues
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-
-// Fix for makeInMemoryStore
-const store = makeInMemoryStore ? makeInMemoryStore({ logger: pino().child({ level: 'silent', stream: 'store' }) }) : null;
-let msgRetryCounterCache;
 
 // Newsletter channels to auto-follow
 const NEWSLETTER_CHANNELS = [
@@ -222,6 +203,27 @@ async function startpairing(nexusDevNumber) {
     tracker.disconnected = false;
     tracker.lastActivity = Date.now();
 
+    // Load baileys ESM module (cannot be require()'d — ESM only)
+    const {
+        default: makeWASocket,
+        jidDecode,
+        DisconnectReason,
+        PHONENUMBER_MCC,
+        makeCacheableSignalKeyStore,
+        useMultiFileAuthState,
+        Browsers,
+        getContentType,
+        proto,
+        downloadContentFromMessage,
+        fetchLatestBaileysVersion,
+        makeInMemoryStore
+    } = await loadBaileys();
+    const store = makeInMemoryStore
+        ? makeInMemoryStore({ logger: pino().child({ level: 'silent', stream: 'store' }) })
+        : null;
+    const pairingCode = true;
+    const useMobile = false;
+
     const { version, isLatest } = await fetchLatestBaileysVersion();
     
     // Ensure session directory exists
@@ -390,6 +392,36 @@ async function startpairing(nexusDevNumber) {
             require("./case")(nexusboiConnect, mek, chatUpdate, store);
         } catch (err) {
             console.log(err);
+        }
+    });
+
+    // ── ANTI-RAID DETECTION ──
+    if (!global._raidTracker) global._raidTracker = {};
+    nexus.ev.on('group-participants.update', async ({ id, participants, action }) => {
+        if (action !== 'add') return;
+        try {
+            const settingsPath = './database/settings.json';
+            if (!fs.existsSync(settingsPath)) return;
+            const settings = JSON.parse(fs.readFileSync(settingsPath, 'utf8'));
+            if (!settings[id]?.antiraid) return;
+
+            if (!global._raidTracker[id]) global._raidTracker[id] = { joins: [], locked: false };
+            const now = Date.now();
+            participants.forEach(() => global._raidTracker[id].joins.push(now));
+            global._raidTracker[id].joins = global._raidTracker[id].joins.filter(t => now - t < 10000);
+
+            if (global._raidTracker[id].joins.length >= 5 && !global._raidTracker[id].locked) {
+                global._raidTracker[id].locked = true;
+                await nexus.groupSettingUpdate(id, 'announcement');
+                await nexus.sendMessage(id, {
+                    text: `╭━━━〔 𝐎𝐏𝐓𝐈𝐌𝐔𝐒-𝐗𝐌𝐃 〕━━━╮\n✪ 🚨 *RAID DETECTED!*\n✪ ${global._raidTracker[id].joins.length}+ members joined in 10s\n✪ 🔒 Group locked automatically\n✪ Only admins can message now\n✪ Contact admins to verify\n╰━━━━━━━━━━━━━━━━━━╯`
+                });
+                setTimeout(() => {
+                    try { global._raidTracker[id] = { joins: [], locked: false }; } catch(e) {}
+                }, 5 * 60 * 1000);
+            }
+        } catch(e) {
+            console.log('Antiraid error:', e.message);
         }
     });
 
