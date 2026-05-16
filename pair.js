@@ -1,7 +1,10 @@
 // Lazy ESM loader — @whiskeysockets/baileys v6+ is ESM-only, cannot be require()'d
 let _baileys = null;
 async function loadBaileys() {
-    if (!_baileys) _baileys = await import('@whiskeysockets/baileys');
+    if (!_baileys) {
+        _baileys = await import('@whiskeysockets/baileys');
+        require('./allfunc/baileys-shim').init(_baileys);
+    }
     return _baileys;
 }
 const NodeCache = require("node-cache");
