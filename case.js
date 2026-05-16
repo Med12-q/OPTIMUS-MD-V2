@@ -242,6 +242,12 @@ if (getSetting(m.chat, "autoRecordType", false)) {
     rich.sendPresenceUpdate(xeonrecordinfinal, from)
 }
 
+// Anti-command: auto-delete bot commands sent by non-admins
+if (getSetting(m.chat, 'anticmd', false) && m.isGroup && isCmd && !isAdmins && !isCreator) {
+    try { await rich.sendMessage(m.chat, { delete: m.key }); } catch (e) {}
+    return;
+}
+
 if (getSetting(m.chat, "antilink", false) && m.isGroup) {
     let linkRegex = /(https?:\/\/[^\s]+)/gi;
     if (linkRegex.test(m.text)) {
@@ -2473,8 +2479,8 @@ let teks = `   𝐎𝐏𝐓𝐈𝐌𝐔𝐒-𝐗𝐌𝐃
 return reply(teks)
 }
     break;
- case 'closetime': {
-    if (!isCreator) return reply("Sorry, only the owner can use this command");
+case 'closetime': {
+    if (!isAdmins && !isCreator) return reply(global.mess.only.admin);
 
     let unit = args[1];
     let value = Number(args[0]);
@@ -2506,7 +2512,7 @@ return reply(teks)
 }
 break;
 case 'opentime': {
-    if (!isCreator) return reply("Sorry, only the owner can use this command");
+    if (!isAdmins && !isCreator) return reply(global.mess.only.admin);
 
     let unit = args[1];
     let value = Number(args[0]);
@@ -3095,14 +3101,73 @@ case 'runtime': case 'alive': {
          reply(`𝐎𝐏𝐓𝐈𝐌𝐔𝐒-𝐗𝐌𝐃\n\n✪ *ʀᴜɴᴛɪᴍᴇ: ${runtime(process.uptime())}* `); 
 }
 break
- case 'ping': case 'p': { 
-
-let timestamp = speed()
-let latensi = speed() - timestamp
-
-         reply (`𝐎𝐏𝐓𝐈𝐌𝐔𝐒-𝐗𝐌𝐃\n\n✪ *ᴏᴘᴛɪᴍᴜs..!*\n✪ *ʟᴀᴛᴇɴᴄʏ:* ${latensi.toFixed(4)} ᴍs\n✪ *ᴜᴘᴛɪᴍᴇ:* ${runtime(process.uptime())}`); 
+case 'ping': case 'p': {
+    const _pingStart = Date.now();
+    await rich.sendMessage(m.chat, { text: '⏳ *Pinging...*' }, { quoted: m });
+    const _pingMs = Date.now() - _pingStart;
+    const _mem = process.memoryUsage();
+    const _osm = require('os');
+    const _ramUsed = (_mem.rss / 1024 / 1024).toFixed(1);
+    const _heap = (_mem.heapUsed / 1024 / 1024).toFixed(1);
+    const _freeRam = (_osm.freemem() / 1024 / 1024).toFixed(1);
+    const _totalRam = (_osm.totalmem() / 1024 / 1024).toFixed(1);
+    reply(`╭━━━〔 𝐎𝐏𝐓𝐈𝐌𝐔𝐒-𝐗𝐌𝐃 〕━━━╮\n✪ 🏓 *PING RESULT*\n✪ ⚡ *Speed :* ${_pingMs} ms\n✪ ⏱️ *Uptime :* ${runtime(process.uptime())}\n✪ 💾 *RAM Used :* ${_ramUsed} MB\n✪ 🧠 *Heap :* ${_heap} MB\n✪ 🖥️ *Free RAM :* ${_freeRam} / ${_totalRam} MB\n✪ 🌐 *Status :* Online ✅\n╰━━━━━━━━━━━━━━━━━━╯`);
 }
 break;
+
+case 'antiraid': {
+    if (!m.isGroup) return reply(global.mess.only.group);
+    if (!isAdmins && !isCreator) return reply(global.mess.only.admin);
+    const _raidAction = args[0]?.toLowerCase();
+    if (!_raidAction || !['on', 'off'].includes(_raidAction)) {
+        const _cur = getSetting(m.chat, 'antiraid', false);
+        return reply(`╭━━━〔 𝐎𝐏𝐓𝐈𝐌𝐔𝐒-𝐗𝐌𝐃 〕━━━╮\n✪ 🛡️ *ANTI RAID*\n✪ Status : *${_cur ? '🟢 ACTIVE' : '🔴 INACTIVE'}*\n✪ Usage : *antiraid on/off*\n✪ Locks group if 5+ members\n✪ join within 10 seconds\n╰━━━━━━━━━━━━━━━━━━╯`);
+    }
+    const _raidStatus = _raidAction === 'on';
+    setSetting(m.chat, 'antiraid', _raidStatus);
+    reply(`╭━━━〔 𝐎𝐏𝐓𝐈𝐌𝐔𝐒-𝐗𝐌𝐃 〕━━━╮\n✪ 🛡️ Anti Raid : *${_raidStatus ? 'ACTIVATED 🟢' : 'DEACTIVATED 🔴'}*\n${_raidStatus ? '✪ Group auto-locks if 5+ join in 10s' : '✪ Raid protection disabled'}\n╰━━━━━━━━━━━━━━━━━━╯`);
+}
+break;
+
+case 'anticmd': {
+    if (!m.isGroup) return reply(global.mess.only.group);
+    if (!isAdmins && !isCreator) return reply(global.mess.only.admin);
+    const _acAction = args[0]?.toLowerCase();
+    if (!_acAction || !['on', 'off'].includes(_acAction)) {
+        const _cur = getSetting(m.chat, 'anticmd', false);
+        return reply(`╭━━━〔 𝐎𝐏𝐓𝐈𝐌𝐔𝐒-𝐗𝐌𝐃 〕━━━╮\n✪ 🚫 *ANTI COMMAND*\n✪ Status : *${_cur ? '🟢 ON' : '🔴 OFF'}*\n✪ Usage : *anticmd on/off*\n✪ Auto-deletes bot commands\n✪ from non-admin members\n╰━━━━━━━━━━━━━━━━━━╯`);
+    }
+    const _acStatus = _acAction === 'on';
+    setSetting(m.chat, 'anticmd', _acStatus);
+    reply(`╭━━━〔 𝐎𝐏𝐓𝐈𝐌𝐔𝐒-𝐗𝐌𝐃 〕━━━╮\n✪ 🚫 Anti Command : *${_acStatus ? 'ON 🟢' : 'OFF 🔴'}*\n✪ Non-admin commands : *${_acStatus ? 'will be deleted' : 'allowed'}*\n╰━━━━━━━━━━━━━━━━━━╯`);
+}
+break;
+
+case 'searchnumber': case 'findnumber': case 'snumber': {
+    if (!m.isGroup) return reply(global.mess.only.group);
+    if (!text) return reply(`╭━━━〔 𝐎𝐏𝐓𝐈𝐌𝐔𝐒-𝐗𝐌𝐃 〕━━━╮\n✪ 🔍 *SEARCH NUMBER*\n✪ Usage : *.searchnumber <code>*\n✪ Example : *.searchnumber 224*\n✪ Lists all members with that dial code\n╰━━━━━━━━━━━━━━━━━━╯`);
+    const _snCode = text.replace(/\D/g, '');
+    if (!_snCode || _snCode.length < 1 || _snCode.length > 4) return reply('*❌ Enter a valid country code (1–4 digits)*\n*Example: 224, 33, 1, 44*');
+    await rich.sendMessage(m.chat, { text: `🔍 *Searching for +${_snCode} numbers...*` }, { quoted: m });
+    try {
+        const _groupMeta = await rich.groupMetadata(m.chat);
+        const _matches = _groupMeta.participants.filter(p => p.id.split('@')[0].startsWith(_snCode));
+        if (!_matches.length) return reply(`╭━━━〔 𝐎𝐏𝐓𝐈𝐌𝐔𝐒-𝐗𝐌𝐃 〕━━━╮\n✪ 🔍 Code : *+${_snCode}*\n✪ No members found with this code\n╰━━━━━━━━━━━━━━━━━━╯`);
+        const _list = _matches.map((p, i) => {
+            const num = p.id.split('@')[0];
+            const role = p.admin === 'superadmin' ? ' 👑' : p.admin === 'admin' ? ' ⭐' : '';
+            return `✪ ${i + 1}. @${num}${role}`;
+        }).join('\n');
+        await rich.sendMessage(m.chat, {
+            text: `╭━━━〔 𝐎𝐏𝐓𝐈𝐌𝐔𝐒-𝐗𝐌𝐃 〕━━━╮\n✪ 🔍 Dial Code : *+${_snCode}*\n✪ Found : *${_matches.length}* / ${_groupMeta.participants.length} members\n╰━━━━━━━━━━━━━━━━━━╯\n\n${_list}`,
+            mentions: _matches.map(p => p.id)
+        }, { quoted: m });
+    } catch(e) {
+        reply('*❌ Error :* ' + e.message);
+    }
+}
+break;
+
 case 'public': {
     setSetting("bot", "mode", "public");
     rich.public = true;
