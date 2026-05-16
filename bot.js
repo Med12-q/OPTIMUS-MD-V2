@@ -146,7 +146,7 @@ bot.start((ctx) => {
     trackUser(userId);
 
     ctx.reply(
-        '╭━━━〔 𝐎𝐏𝐓𝐈𝐌𝐔𝐒-𝐗𝐌𝐃 〕━━━╮\n✪ ᴜsᴇ ᴍʏ ʙᴏᴛ ᴄᴀʀᴇғᴜʟʟʏ\n✪ ᴛᴏ ᴜsᴇ ᴍʏ ᴏᴘᴛɪᴍᴜs ʙᴏᴛ ᴄʟɪᴄᴋ ᴘᴀɪʀɪɴɢ\n✪ ᴅᴇᴠ: @Varnox_Or_novark\n╰━━━━━━━━━━━━━━━━━━╯',
+        '╭━━━〔 𝐎𝐏𝐓𝐈𝐌𝐔𝐒-𝐗𝐌𝐃 〕━━━╮\n✪ ᴜsᴇ ᴍʏ ʙᴏᴛ ᴄᴀʀᴇғᴜʟʟʏ\n✪ ᴛᴏ ᴜsᴇ ᴍʏ ᴏᴘᴛɪᴍᴜs ʙᴏᴛ ᴄʟɪᴄᴋ ᴘᴀɪʀɪɴɢ\n✪ ᴅᴇᴠ: @Varnox_Or_novark \n╰━━━━━━━━━━━━━━━━━━╯',
         {
             parse_mode: 'Markdown',
             reply_markup: {
