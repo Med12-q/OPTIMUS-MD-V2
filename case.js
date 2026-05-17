@@ -10,15 +10,23 @@ const fsx = require('fs-extra')
 const crypto = require('crypto')
 const googleTTS = require('google-tts-api')
 const mathjs = require('mathjs')
-const speed = require('performance-now')
+const speed = () => Date.now()
 const timestampp = speed();
-const jimp = require("jimp")
+let jimp; try { jimp = require("jimp"); } catch(e) { jimp = null; console.warn('[WARN] jimp not available:', e.message); }
 const latensi = speed() - timestampp
 const moment = require('moment-timezone')
 const yts = require('yt-search');
-const ytdl = require('@vreden/youtube_scraper');
+let ytdl; try { ytdl = require('@vreden/youtube_scraper'); } catch(e) { ytdl = null; console.warn('[WARN] @vreden/youtube_scraper not available:', e.message); }
 const { smsg, tanggal, getTime, isUrl, sleep, clockString, runtime, fetchJson, getBuffer, jsonformat, format, parseMention, getRandom, getGroupAdmins, generateProfilePicture } = require('./allfunc/storage')
-const { imageToWebp, videoToWebp, writeExifImg, writeExifVid, addExif } = require('./allfunc/exif.js')
+let imageToWebp, videoToWebp, writeExifImg, writeExifVid, addExif;
+try {
+    const exif = require('./allfunc/exif.js');
+    imageToWebp = exif.imageToWebp; videoToWebp = exif.videoToWebp;
+    writeExifImg = exif.writeExifImg; writeExifVid = exif.writeExifVid; addExif = exif.addExif;
+} catch(e) {
+    console.warn('[WARN] exif.js not available (ffmpeg missing?):', e.message);
+    imageToWebp = videoToWebp = writeExifImg = writeExifVid = addExif = async () => { throw new Error('ffmpeg not available'); };
+}
 const richpic = fs.readFileSync(`./media/image1.jpg`)
 const numberEmojis = ["1️⃣","2️⃣","3️⃣","4️⃣","5️⃣","6️⃣","7️⃣","8️⃣","9️⃣"];
 // At the very top of your index.js or main bot file
